@@ -10,6 +10,8 @@ export default async function CliAuthPage() {
   const session = await auth()
   if (!session?.user?.id) redirect('/login')
 
+  if (!redis) redirect('/dashboard')
+
   const token = crypto.randomBytes(32).toString('hex')
   await redis.set(`cli-token:${token}`, session.user.id, { ex: 600 })
 

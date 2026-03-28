@@ -1,8 +1,12 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { redis } from '@/lib/redis'
 
 export async function GET(req: NextRequest) {
+  if (!redis) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
+
   const token = req.nextUrl.searchParams.get('token')
   if (!token) return NextResponse.json({ error: 'Token required' }, { status: 400 })
 

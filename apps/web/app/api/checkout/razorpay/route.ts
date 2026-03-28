@@ -1,4 +1,5 @@
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -19,9 +20,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { success } = await checkoutRatelimit.limit(session.user.id)
-  if (!success) {
-    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+  if (checkoutRatelimit) {
+    const { success } = await checkoutRatelimit.limit(session.user.id)
+    if (!success) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+    }
   }
 
   const body: unknown = await req.json()
