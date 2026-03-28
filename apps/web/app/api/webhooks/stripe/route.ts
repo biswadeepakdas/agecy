@@ -2,10 +2,15 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
+import Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/db'
 
 export async function POST(req: NextRequest) {
+  if (!stripe) {
+    return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 })
+  }
+
   const body = await req.text()
   const sig = req.headers.get('stripe-signature')
 
@@ -13,7 +18,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No signature' }, { status: 400 })
   }
 
-  let event: ReturnType<typeof stripe.webhooks.constructEvent>
+  let event: Stripe.Event
   try {
     event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
   } catch {

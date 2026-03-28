@@ -1,8 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk'
 
-export const anthropicClient = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-})
+const key = process.env.ANTHROPIC_API_KEY
+
+export const anthropicClient = key ? new Anthropic({ apiKey: key }) : null
 
 export const ANTHROPIC_MODELS = {
   SONNET: 'claude-sonnet-4-6',
@@ -14,6 +14,7 @@ export async function claudeCompletion(
   model: string = ANTHROPIC_MODELS.SONNET,
   maxTokens: number = 1000
 ): Promise<string> {
+  if (!anthropicClient) throw new Error('Anthropic API key not configured')
   const message = await anthropicClient.messages.create({
     model,
     max_tokens: maxTokens,
