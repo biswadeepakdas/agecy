@@ -4,44 +4,25 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
-import {
-  Bot, Package, Library, Settings, Terminal, Menu,
-} from 'lucide-react'
+import { Menu } from 'lucide-react'
+import { SidebarNav } from './sidebar-nav'
 
-const NAV_LINKS = [
-  { href: '/dashboard/agents', label: 'Agents', icon: Bot },
-  { href: '/dashboard/bundles', label: 'Bundles', icon: Package },
-  { href: '/dashboard/library', label: 'Library', icon: Library },
-  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
-  { href: '/dashboard/cli-auth', label: 'CLI Auth', icon: Terminal },
-]
-
-function SidebarContent({ pathname }: { pathname?: string }) {
+function SidebarContent() {
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-5 border-b border-zinc-800">
-        <Link href="/" className="flex items-center gap-2 font-bold text-white text-lg">
-          <span>⚡</span>
-          <span>Agecy</span>
+      {/* Logo */}
+      <div className="px-4 py-5 border-b border-white/[0.06]">
+        <Link href="/" className="flex items-center gap-2 group">
+          <span className="text-amber-400 text-lg">⚡</span>
+          <span className="font-bold text-white tracking-tight">Agecy</span>
         </Link>
       </div>
-      <ScrollArea className="flex-1 px-2 py-4">
-        <nav className="space-y-1">
-          {NAV_LINKS.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
-            >
-              <Icon className="w-4 h-4 shrink-0" />
-              {label}
-            </Link>
-          ))}
-        </nav>
-      </ScrollArea>
+
+      {/* Nav */}
+      <div className="flex-1 overflow-auto py-2">
+        <SidebarNav />
+      </div>
     </div>
   )
 }
@@ -57,44 +38,66 @@ export default async function DashboardLayout({
   const user = session.user
 
   return (
-    <div className="flex h-screen bg-zinc-950 overflow-hidden">
+    <div className="flex h-screen overflow-hidden" style={{ background: '#09090B' }}>
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex flex-col w-56 border-r border-zinc-800 bg-zinc-900/50 shrink-0">
+      <aside
+        className="hidden lg:flex flex-col w-56 border-r border-white/[0.06] shrink-0 relative"
+        style={{
+          backdropFilter: 'blur(24px) saturate(1.2)',
+          background: 'rgba(255,255,255,0.02)',
+        }}
+      >
+        {/* Right-edge catch-light */}
+        <div className="absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-white/[0.08] to-transparent pointer-events-none" aria-hidden="true" />
+
         <SidebarContent />
-        {/* User info at bottom */}
-        <div className="px-3 py-4 border-t border-zinc-800">
-          <div className="flex items-center gap-2.5 px-1">
+
+        {/* User pill at bottom */}
+        <div className="px-3 py-4 border-t border-white/[0.06]">
+          <div
+            className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06]"
+          >
             <Avatar className="w-7 h-7 shrink-0">
               <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? 'User'} />
-              <AvatarFallback className="bg-zinc-700 text-zinc-200 text-xs">
+              <AvatarFallback className="bg-amber-500/20 text-amber-400 text-xs font-semibold">
                 {user?.name?.[0]?.toUpperCase() ?? 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
               <p className="text-xs font-medium text-zinc-200 truncate">{user?.name ?? 'User'}</p>
-              <p className="text-xs text-zinc-500 truncate">{user?.email ?? ''}</p>
+              <p className="text-[10px] text-zinc-600 truncate">{user?.email ?? ''}</p>
             </div>
           </div>
         </div>
       </aside>
 
       {/* Mobile header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 flex items-center gap-3 px-4 py-3 bg-zinc-900/95 backdrop-blur border-b border-zinc-800">
+      <div
+        className="lg:hidden fixed top-0 left-0 right-0 z-30 flex items-center gap-3 px-4 py-3 border-b border-white/[0.06]"
+        style={{ backdropFilter: 'blur(24px)', background: 'rgba(9,9,11,0.85)' }}
+      >
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-white w-8 h-8">
+            <button className="text-zinc-500 hover:text-zinc-200 transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/[0.05]">
               <Menu className="w-5 h-5" />
-            </Button>
+            </button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-56 p-0 bg-zinc-900 border-zinc-800">
+          <SheetContent
+            side="left"
+            className="w-56 p-0 border-white/[0.08]"
+            style={{ background: 'rgba(9,9,11,0.95)', backdropFilter: 'blur(24px)' }}
+          >
             <SidebarContent />
           </SheetContent>
         </Sheet>
-        <Link href="/" className="font-bold text-white">⚡ Agecy</Link>
+        <Link href="/" className="flex items-center gap-1.5 font-bold text-white">
+          <span className="text-amber-400">⚡</span>
+          <span>Agecy</span>
+        </Link>
         <div className="ml-auto">
           <Avatar className="w-7 h-7">
             <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? ''} />
-            <AvatarFallback className="bg-zinc-700 text-zinc-200 text-xs">
+            <AvatarFallback className="bg-amber-500/20 text-amber-400 text-xs font-semibold">
               {user?.name?.[0]?.toUpperCase() ?? 'U'}
             </AvatarFallback>
           </Avatar>

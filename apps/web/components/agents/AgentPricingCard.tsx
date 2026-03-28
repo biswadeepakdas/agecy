@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { GlassCard } from '@/components/ui/glass-card'
 
 interface AgentPricingCardProps {
   agent: {
@@ -57,7 +56,9 @@ export function AgentPricingCard({ agent, owned }: AgentPricingCardProps) {
         window.location.href = data.url as string
       } else {
         await loadRazorpayScript()
-        const RazorpayConstructor = (window as unknown as { Razorpay: new (opts: unknown) => { open(): void } }).Razorpay
+        const RazorpayConstructor = (
+          window as unknown as { Razorpay: new (opts: unknown) => { open(): void } }
+        ).Razorpay
         const rzp = new RazorpayConstructor({
           key: data.key,
           amount: data.amount,
@@ -77,29 +78,32 @@ export function AgentPricingCard({ agent, owned }: AgentPricingCardProps) {
 
   if (owned) {
     return (
-      <Card className="bg-zinc-900 border-zinc-800">
-        <CardContent className="pt-6 space-y-4">
-          <p className="text-emerald-400 font-semibold text-lg">✓ Owned</p>
-          <Button asChild className="w-full">
-            <Link href="/dashboard/library">Go to Library</Link>
-          </Button>
-        </CardContent>
-      </Card>
+      <GlassCard variant="glow" className="p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]" />
+          <span className="text-emerald-400 font-semibold text-sm">Owned</span>
+        </div>
+        <p className="text-xs text-zinc-500">This agent is in your library and ready to install.</p>
+        <Link
+          href="/dashboard/library"
+          className="block w-full text-center py-2.5 px-4 rounded-xl text-sm font-medium bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/25 transition-colors duration-200"
+        >
+          Go to Library
+        </Link>
+      </GlassCard>
     )
   }
 
   if (agent.isFree) {
     return (
-      <Card className="bg-zinc-900 border-zinc-800">
-        <CardHeader>
-          <CardTitle className="text-emerald-400 text-3xl font-bold">Free</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
-            Add to Library
-          </Button>
-        </CardContent>
-      </Card>
+      <GlassCard variant="glow" className="p-6 space-y-4">
+        <div>
+          <span className="text-emerald-400 text-3xl font-bold tracking-tight">Free</span>
+        </div>
+        <button className="w-full py-2.5 px-4 rounded-xl text-sm font-semibold bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/25 transition-all duration-200">
+          Add to Library
+        </button>
+      </GlassCard>
     )
   }
 
@@ -113,29 +117,37 @@ export function AgentPricingCard({ agent, owned }: AgentPricingCardProps) {
         : null
 
   return (
-    <Card className="bg-zinc-900 border-zinc-800">
-      <CardHeader>
-        <CardTitle className="text-white text-3xl font-bold">
-          {priceDisplay ?? 'Contact us'}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <Button className="w-full" onClick={handleCheckout} disabled={loading}>
-          {loading
-            ? 'Loading...'
-            : currency === 'INR'
-              ? 'Buy with Razorpay'
-              : 'Buy with Stripe'}
-        </Button>
-        <div className="text-center">
-          <button
-            className="text-xs text-zinc-500 hover:text-zinc-300 underline"
-            onClick={() => setCurrency((c) => (c === 'INR' ? 'USD' : 'INR'))}
-          >
-            {currency === 'INR' ? 'Switch to USD' : 'Switch to INR'}
-          </button>
-        </div>
-      </CardContent>
-    </Card>
+    <GlassCard variant="premium" className="p-6 space-y-5">
+      {/* Price */}
+      <div>
+        <span className="text-4xl font-bold text-white tracking-tight">{priceDisplay ?? '—'}</span>
+        <p className="text-xs text-zinc-600 mt-1">One-time purchase · Lifetime access</p>
+      </div>
+
+      {/* CTA */}
+      <button
+        onClick={handleCheckout}
+        disabled={loading}
+        className="w-full py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+          bg-gradient-to-r from-amber-500 to-amber-400 text-zinc-950
+          hover:from-amber-400 hover:to-amber-300 hover:shadow-[0_8px_24px_rgba(245,158,11,0.35)]"
+      >
+        {loading
+          ? 'Loading…'
+          : currency === 'INR'
+            ? 'Buy with Razorpay'
+            : 'Buy with Stripe'}
+      </button>
+
+      {/* Currency toggle */}
+      <div className="text-center">
+        <button
+          className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors underline underline-offset-2"
+          onClick={() => setCurrency((c) => (c === 'INR' ? 'USD' : 'INR'))}
+        >
+          {currency === 'INR' ? 'Switch to USD (Stripe)' : 'Switch to INR (Razorpay)'}
+        </button>
+      </div>
+    </GlassCard>
   )
 }

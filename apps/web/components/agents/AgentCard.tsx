@@ -1,22 +1,7 @@
 import Link from 'next/link'
 import type { Agent } from '@prisma/client'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { TierBadge } from '@/components/ui/tier-badge'
 import { cn } from '@/lib/utils'
-
-const TIER_STYLES: Record<string, string> = {
-  S: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-  A: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-  B: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  C: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
-}
-
-const TIER_BORDER: Record<string, string> = {
-  S: 'hover:border-yellow-500/30',
-  A: 'hover:border-purple-500/30',
-  B: 'hover:border-blue-500/30',
-  C: 'hover:border-zinc-500/30',
-}
 
 function formatDivision(div: string) {
   return div.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
@@ -27,47 +12,61 @@ interface AgentCardProps {
 }
 
 export function AgentCard({ agent }: AgentCardProps) {
-  const tierStyle = TIER_STYLES[agent.tier] ?? TIER_STYLES.C
-  const tierBorder = TIER_BORDER[agent.tier] ?? TIER_BORDER.C
+  const isSTier = agent.tier === 'S'
 
   return (
-    <Link href={`/dashboard/agents/${agent.slug}`}>
-      <Card
+    <Link href={`/dashboard/agents/${agent.slug}`} className="block h-full">
+      <div
         className={cn(
-          'bg-zinc-900 border-zinc-800 transition-colors cursor-pointer h-full',
-          tierBorder
+          'relative rounded-2xl overflow-hidden h-full flex flex-col',
+          'bg-white/[0.03] border transition-all duration-300 ease-out cursor-pointer',
+          'hover:-translate-y-0.5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)]',
+          'glass-shimmer',
+          isSTier
+            ? 'border-amber-500/20 hover:border-amber-500/35 hover:shadow-[0_20px_40px_rgba(245,158,11,0.12)]'
+            : 'border-white/[0.08] hover:border-white/[0.14]'
         )}
+        style={{ backdropFilter: 'blur(24px) saturate(1.5)' }}
       >
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between gap-2">
-            <span className="text-2xl leading-none">{agent.emoji}</span>
-            <div className="flex items-center gap-1.5 shrink-0">
-              <Badge className={cn('text-xs', tierStyle)}>
-                {agent.tier}
-              </Badge>
-              <Badge variant="outline" className="text-xs border-zinc-700 text-zinc-500 max-w-[90px] truncate">
+        {/* Top catch-light */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" aria-hidden="true" />
+
+        {/* S-tier ambient glow */}
+        {isSTier && (
+          <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-amber-500/5 to-transparent pointer-events-none" aria-hidden="true" />
+        )}
+
+        <div className="p-4 flex flex-col flex-1">
+          {/* Header row */}
+          <div className="flex items-start justify-between gap-2 mb-3">
+            <span className="text-3xl leading-none">{agent.emoji}</span>
+            <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+              <TierBadge tier={agent.tier} />
+              <span className="text-[10px] text-zinc-600 bg-zinc-800/60 border border-zinc-700/50 px-1.5 py-0.5 rounded truncate max-w-[80px]">
                 {formatDivision(agent.division)}
-              </Badge>
+              </span>
             </div>
           </div>
-          <h3 className="font-semibold text-white text-sm mt-2 leading-tight">{agent.name}</h3>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">{agent.description}</p>
+
+          {/* Name */}
+          <h3 className="font-semibold text-zinc-100 text-sm leading-snug mb-2">{agent.name}</h3>
+
+          {/* Description */}
+          <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2 flex-1">{agent.description}</p>
 
           {/* Tags */}
           {agent.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1 mt-3">
               {agent.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-zinc-800 text-zinc-400"
+                  className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium bg-white/[0.04] border border-white/[0.07] text-zinc-500"
                 >
                   {tag}
                 </span>
               ))}
               {agent.tags.length > 3 && (
-                <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] text-zinc-600">
+                <span className="text-[10px] text-zinc-700 px-1 py-0.5">
                   +{agent.tags.length - 3}
                 </span>
               )}
@@ -75,15 +74,17 @@ export function AgentCard({ agent }: AgentCardProps) {
           )}
 
           {/* Price */}
-          <div className="pt-1">
+          <div className="mt-3 pt-3 border-t border-white/[0.05]">
             {agent.isFree ? (
               <span className="text-sm font-semibold text-emerald-400">Free</span>
             ) : agent.priceUSD ? (
-              <span className="text-sm font-semibold text-white">${(agent.priceUSD / 100).toFixed(0)}</span>
+              <span className="text-sm font-bold text-amber-400">
+                ${(agent.priceUSD / 100).toFixed(0)}
+              </span>
             ) : null}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </Link>
   )
 }

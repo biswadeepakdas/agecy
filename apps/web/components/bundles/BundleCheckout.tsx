@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { GlassCard } from '@/components/ui/glass-card'
 
 interface BundleCheckoutProps {
   bundleId: string
@@ -84,56 +84,70 @@ export function BundleCheckout({
 
   if (owned) {
     return (
-      <div className="space-y-3">
-        <p className="text-emerald-400 font-semibold text-lg">✓ Owned</p>
-        <Button asChild className="w-full">
-          <Link href="/dashboard/library">Go to Library</Link>
-        </Button>
-      </div>
+      <GlassCard variant="glow" className="p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]" />
+          <span className="text-emerald-400 font-semibold text-sm">Bundle Owned</span>
+        </div>
+        <p className="text-xs text-zinc-500">All agents in this bundle are in your library.</p>
+        <Link
+          href="/dashboard/library"
+          className="block w-full text-center py-2.5 px-4 rounded-xl text-sm font-medium bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/25 transition-colors duration-200"
+        >
+          Go to Library
+        </Link>
+      </GlassCard>
     )
   }
 
   return (
-    <div className="space-y-4">
+    <GlassCard variant="premium" className="p-6 space-y-5">
       {/* Savings callout */}
-      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 space-y-0.5">
+      <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-3">
         <p className="text-emerald-400 text-sm font-semibold">
-          Save ${(savings / 100).toFixed(0)} ({savingsPct}% off)
+          Save ${(savings / 100).toFixed(0)} — {savingsPct}% off
         </p>
-        <p className="text-xs text-zinc-400">
-          vs buying individually (${(originalPriceUSD / 100).toFixed(0)} separately)
+        <p className="text-xs text-zinc-500 mt-0.5">
+          vs ${(originalPriceUSD / 100).toFixed(0)} individually
         </p>
       </div>
 
       {/* Price */}
       <div className="flex items-baseline gap-2">
-        <span className="text-3xl font-bold text-white">
-          {currency === 'INR'
-            ? `₹${(priceINR / 100).toFixed(0)}`
-            : `$${(priceUSD / 100).toFixed(0)}`}
+        <span className="text-4xl font-bold text-white tracking-tight">
+          {currency === 'INR' ? `₹${(priceINR / 100).toFixed(0)}` : `$${(priceUSD / 100).toFixed(0)}`}
         </span>
         {currency === 'USD' && (
-          <span className="text-sm text-zinc-500 line-through">
+          <span className="text-sm text-zinc-600 line-through">
             ${(originalPriceUSD / 100).toFixed(0)}
           </span>
         )}
       </div>
 
-      <Button className="w-full" onClick={handleCheckout} disabled={loading}>
+      {/* CTA */}
+      <button
+        onClick={handleCheckout}
+        disabled={loading}
+        className="w-full py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+          bg-gradient-to-r from-amber-500 to-amber-400 text-zinc-950
+          hover:from-amber-400 hover:to-amber-300 hover:shadow-[0_8px_24px_rgba(245,158,11,0.35)]"
+      >
         {loading
-          ? 'Loading...'
+          ? 'Loading…'
           : currency === 'INR'
             ? 'Buy with Razorpay'
             : 'Buy with Stripe'}
-      </Button>
+      </button>
+
+      {/* Currency toggle */}
       <div className="text-center">
         <button
-          className="text-xs text-zinc-500 hover:text-zinc-300 underline"
+          className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors underline underline-offset-2"
           onClick={() => setCurrency((c) => (c === 'INR' ? 'USD' : 'INR'))}
         >
-          {currency === 'INR' ? 'Switch to USD' : 'Switch to INR'}
+          {currency === 'INR' ? 'Switch to USD (Stripe)' : 'Switch to INR (Razorpay)'}
         </button>
       </div>
-    </div>
+    </GlassCard>
   )
 }
