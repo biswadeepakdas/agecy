@@ -27,6 +27,10 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  if (!stripe) {
+    return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 })
+  }
+
   const body: unknown = await req.json()
   const parsed = bodySchema.safeParse(body)
   if (!parsed.success) {

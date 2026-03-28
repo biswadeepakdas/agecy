@@ -27,6 +27,10 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  if (!razorpay) {
+    return NextResponse.json({ error: 'Razorpay not configured' }, { status: 503 })
+  }
+
   const body: unknown = await req.json()
   const parsed = bodySchema.safeParse(body)
   if (!parsed.success) {
